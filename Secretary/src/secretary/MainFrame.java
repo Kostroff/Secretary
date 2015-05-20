@@ -267,7 +267,31 @@ public class MainFrame extends javax.swing.JFrame {
 
     static class CheckEvent implements Runnable {
         public void run() {
-            LocalDateTime timePoint = LocalDateTime.now();
+            try {
+                Calendar curDate;
+                String curDateString;
+                StringBuilder s;
+                for(;;) {
+                    if (DBisOn) {
+                        curDate = Calendar.getInstance();
+                        curDateString = Event.buildStringDate(curDate);
+                        
+                        s = new StringBuilder("SELECT MIN(DATE) FROM MAINTABLE WHERE DATE >= '2015-05-20'"); //.insert(51, curDateString
+                        ResultSet result = db.executeQuery(s.toString());
+                        result.beforeFirst();
+                        Event event = new Event(result, true);
+                        
+                        
+                        
+                        System.out.println(event.getDate());
+                    }
+                    Thread.sleep(5000);
+                }
+            } catch(InterruptedException e){
+                return;
+            } catch (SQLException e) {
+                Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, e);
+            }
             //timePoint
             //StringBuilder sb = new StringBuilder("SELECT * FROM MAINTABLE WHERE DATE = ''").insert(38, Event.buildStringDate(cal));
             
