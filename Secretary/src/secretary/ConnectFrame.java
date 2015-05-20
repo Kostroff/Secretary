@@ -35,7 +35,7 @@ public class ConnectFrame extends javax.swing.JFrame {
         jTextField3 = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setResizable(false);
 
         jLabel1.setText("Имя базы данных");
@@ -100,10 +100,18 @@ public class ConnectFrame extends javax.swing.JFrame {
         );
 
         pack();
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         DB db = new DB(jTextField1.getText(), jTextField2.getText(), jTextField3.getText());
+        if (DB.getCon() != null) {
+            SuccessForm sf = new SuccessForm();
+            sf.setVisible(true);
+        } else {
+            FailForm ff = new FailForm();
+            ff.setVisible(true);
+        }
         MainFrame.setDB(db);
     }//GEN-LAST:event_jButton1ActionPerformed
 

@@ -1,15 +1,21 @@
 package secretary;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
+import javax.swing.Timer;
 
 public class MainFrame extends javax.swing.JFrame {
 
+    private static Timer timer;
     private static DB db;
+    private static boolean DBisOn = false;
     private static Calendar cal;
     private static ArrayList<Event> eventsList;
     private static DefaultListModel listModel;
@@ -19,6 +25,10 @@ public class MainFrame extends javax.swing.JFrame {
      */
     public MainFrame() {
         initComponents();
+    }
+    
+    public static void setDB(DB db) {
+        MainFrame.db = db;
     }
 
     public static Calendar getCal() {
@@ -99,10 +109,16 @@ public class MainFrame extends javax.swing.JFrame {
         jLabel1.setText("Статус подклчение к базе данных:");
 
         jLabel2.setText("Не подключена");
+        jLabel2.setName(""); // NOI18N
 
         jMenu1.setText("Menu");
 
         jMenuItem1.setText("DB Connect");
+        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem1ActionPerformed(evt);
+            }
+        });
         jMenu1.add(jMenuItem1);
         jMenu1.add(jSeparator1);
 
@@ -176,22 +192,27 @@ public class MainFrame extends javax.swing.JFrame {
         
         StringBuilder sb = new StringBuilder("SELECT * FROM MAINTABLE WHERE DATE = ''").insert(38, Event.buildStringDate(cal));
         
-        try {
-            ResultSet rs = db.executeQuery(sb.toString());
-            int rows = 0;
-            if (rs.last()) {
-                rows = rs.getRow();
+        if (DBisOn) {
+            try {
+                ResultSet rs = db.executeQuery(sb.toString());
+                int rows = 0;
+                if (rs.last()) {
+                    rows = rs.getRow();
+                }
+                rs.beforeFirst();
+                eventsList = new ArrayList();
+                listModel = new DefaultListModel();
+                for (int i=0;i<rows;i++) {
+                    eventsList.add(new Event(rs));
+                    listModel.addElement(eventsList.get(i).getTime() + " " + eventsList.get(i).getName());
+                }
+                jList.setModel(listModel);
+            } catch (SQLException e) {
+                Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, e);
             }
-            rs.beforeFirst();
-            eventsList = new ArrayList();
-            listModel = new DefaultListModel();
-            for (int i=0;i<rows;i++) {
-                eventsList.add(new Event(rs));
-                listModel.addElement(eventsList.get(i).getTime() + " " + eventsList.get(i).getName());
-            }
-            jList.setModel(listModel);
-        } catch (SQLException e) {
-            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, e);
+        } else {
+            FailForm ff = new FailForm();
+            ff.setVisible(true);
         }
     }//GEN-LAST:event_jCalendarMouseClicked
 
@@ -208,7 +229,12 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_jListMouseClicked
 
     private void jButtonAddMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButtonAddMouseClicked
-        AddFrame addFrame = new AddFrame();
+        if (DBisOn) {
+            AddFrame addFrame = new AddFrame();   
+        } else {
+            FailForm ff = new FailForm();
+            ff.setVisible(true);
+        }
     }//GEN-LAST:event_jButtonAddMouseClicked
 
     private void jButtonUpdateMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButtonUpdateMouseClicked
@@ -234,12 +260,42 @@ public class MainFrame extends javax.swing.JFrame {
         System.exit(0);
     }//GEN-LAST:event_jMenuItem2ActionPerformed
 
+    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+        ConnectFrame conFrame = new ConnectFrame();
+        conFrame.setVisible(true);
+    }//GEN-LAST:event_jMenuItem1ActionPerformed
+
+    static class CheckEvent implements Runnable {
+        public void run() {
+            LocalDateTime timePoint = LocalDateTime.now();
+            //timePoint
+            //StringBuilder sb = new StringBuilder("SELECT * FROM MAINTABLE WHERE DATE = ''").insert(38, Event.buildStringDate(cal));
+            
+        }
+    }
+    
+    static class CheckDBListener implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            if (DB.getCon() != null) {
+                jLabel2.setText("Подключена");
+                DBisOn = true;
+            } else {
+                jLabel2.setText("Не подключена");
+                DBisOn = false;
+            }
+        }
+    }
     /**
      * @param args the command line arguments
      */
     public static void main(String args[]) throws SQLException {
         //db = new DB("jdbc:derby://localhost:1527/TestDB", "kostroff", "x1439721");
-        
+        CheckDBListener cdbl = new CheckDBListener();
+        timer = new Timer(5000, cdbl);
+        timer.start();
+        CheckEvent ce = new CheckEvent();
+        Thread myThread = new Thread(ce);
+        myThread.start();
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
@@ -276,7 +332,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JButton jButtonUpdate;
     private com.toedter.calendar.JCalendar jCalendar;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
+    private static javax.swing.JLabel jLabel2;
     private javax.swing.JList jList;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuBar jMenuBar1;
