@@ -10,7 +10,7 @@
     </Property>
     <Property name="name" type="java.lang.String" value="updateFrame" noResource="true"/>
     <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-      <Dimension value="[356, 241]"/>
+      <Dimension value="[356, 265]"/>
     </Property>
     <Property name="resizable" type="boolean" value="false"/>
   </Properties>

@@ -53,7 +53,7 @@ public class UpdateFrame extends javax.swing.JFrame {
         setAlwaysOnTop(true);
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         setName("updateFrame"); // NOI18N
-        setPreferredSize(new java.awt.Dimension(356, 241));
+        setPreferredSize(new java.awt.Dimension(356, 265));
         setResizable(false);
 
         jTextFieldTime.setText("ЧЧ:ММ:СС");

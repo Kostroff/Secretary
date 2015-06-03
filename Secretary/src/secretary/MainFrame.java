@@ -6,8 +6,11 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.DefaultListModel;
 import javax.swing.Timer;
 
@@ -269,23 +272,83 @@ public class MainFrame extends javax.swing.JFrame {
         public void run() {
             try {
                 Calendar curDate;
-                String curDateString;
+                String curDateString, curTimeString;
                 StringBuilder s;
+                Event event;
+                Pattern dayPattern = Pattern.compile("[0-9][0-9]$");
+                Pattern monthPattern = Pattern.compile("-[0-9][0-9]-");
+                Pattern yearPattern = Pattern.compile("[0-9][0-9][0-9][0-9]");
+                Pattern hourPattern = Pattern.compile("^[0-9][0-9]");
+                Pattern minPattern = Pattern.compile(":[0-9][0-9]:");
+                Pattern secPattern = Pattern.compile("[0-9][0-9]$");
+                
+                int day, month, year, hour, min, sec;
+                
                 for(;;) {
                     if (DBisOn) {
                         curDate = Calendar.getInstance();
                         curDateString = Event.buildStringDate(curDate);
+                        curTimeString = curDate.get(Calendar.HOUR_OF_DAY) + ":";
+                        if (curDate.get(Calendar.MINUTE) < 10) {
+                            curTimeString += "0" + curDate.get(Calendar.MINUTE) + ":";
+                        } else {
+                            curTimeString += curDate.get(Calendar.MINUTE) + ":";
+                        }
                         
-                        s = new StringBuilder("SELECT MIN(DATE) FROM MAINTABLE WHERE DATE >= '2015-05-20'"); //.insert(51, curDateString
+                        if (curDate.get(Calendar.SECOND) < 10) {
+                            curTimeString += "0" + curDate.get(Calendar.SECOND);
+                        } else {
+                            curTimeString += curDate.get(Calendar.SECOND);
+                        }
+                        
+                        s = new StringBuilder("select ID, DATE, TIME, NAME, TEXT from MAINTABLE where (DATE = (SELECT MIN(DATE) FROM MAINTABLE WHERE (DATE>='') AND (TIME>=''))) AND (TIME = (Select min(time) from maintable where (TIME>='') and (DATE>='')))");
+                        s.insert(110, curDateString);
+                        s.insert(133,curTimeString);
+                        s.insert(205,curTimeString);
+                        s.insert(228, curDateString);
+                        
+                        
                         ResultSet result = db.executeQuery(s.toString());
                         result.beforeFirst();
-                        Event event = new Event(result, true);
+                        event = new Event(result);
+                        if (event.getDate() == null) continue;
+                        Matcher dayMatcher = dayPattern.matcher(event.getDate());
+                        Matcher monthMatcher = monthPattern.matcher(event.getDate());
+                        Matcher yearMatcher = yearPattern.matcher(event.getDate());
+                        Matcher hourMatcher = hourPattern.matcher(event.getTime());
+                        Matcher minMatcher = minPattern.matcher(event.getTime());
+                        Matcher secMatcher = secPattern.matcher(event.getTime());
+                        
+                        dayMatcher.find();
+                        monthMatcher.find();
+                        yearMatcher.find();
+                        hourMatcher.find();
+                        minMatcher.find();
+                        secMatcher.find();
+                        
+                        day = Integer.valueOf(dayMatcher.group());
+                        month = Integer.valueOf(monthMatcher.group().replace("-", ""));
+                        year = Integer.valueOf(yearMatcher.group());
+                        hour = Integer.valueOf(hourMatcher.group());
+                        min = Integer.valueOf(minMatcher.group().replace(":", ""));
+                        sec = Integer.valueOf(secMatcher.group());
                         
                         
                         
-                        System.out.println(event.getDate());
+                        if ((curDate.get(Calendar.DAY_OF_MONTH) == day)&&(curDate.get(Calendar.YEAR) == year)
+                                &&(curDate.get(Calendar.MONTH) == month-1)&&(curDate.get(Calendar.HOUR_OF_DAY) == hour)
+                                &&(curDate.get(Calendar.MINUTE) == min)&&(curDate.get(Calendar.SECOND) == sec)) {
+                            EventForm ef = new EventForm(event);
+                            ef.setVisible(true);
+                        }
+                        
+                        
+                        //System.out.println(day + " " + (month-1) + " " + year + " " + hour + " " + min + " " + sec);
+                        //System.out.println(curDateString + " " + curTimeString);
+                        //System.out.println(curDate.get(Calendar.DAY_OF_MONTH) + " " + curDate.get(Calendar.MONTH) + " " 
+                        //        + curDate.get(Calendar.YEAR) + " " + curDate.get(Calendar.HOUR_OF_DAY) + " " + curDate.get(Calendar.MINUTE) + " " + curDate.get(Calendar.SECOND));
                     }
-                    Thread.sleep(5000);
+                    Thread.sleep(1000);
                 }
             } catch(InterruptedException e){
                 return;
@@ -293,8 +356,6 @@ public class MainFrame extends javax.swing.JFrame {
                 Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, e);
             }
             //timePoint
-            //StringBuilder sb = new StringBuilder("SELECT * FROM MAINTABLE WHERE DATE = ''").insert(38, Event.buildStringDate(cal));
-            
         }
     }
     

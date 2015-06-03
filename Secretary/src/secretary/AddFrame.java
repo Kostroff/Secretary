@@ -137,6 +137,9 @@ public class AddFrame extends javax.swing.JFrame {
                 event.insert();
                 SuccessForm sf = new SuccessForm();
                 sf.setVisible(true);
+            } else {
+                FailForm ff = new FailForm();
+                ff.setVisible(true);
             }
         } catch (SQLException ex) {
             Logger.getLogger(AddFrame.class.getName()).log(Level.SEVERE, null, ex);

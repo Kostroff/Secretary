@@ -54,6 +54,12 @@ public class Event {
             this.text = rs.getString("TEXT");
         }
     }
+    
+    /*Event(ResultSet rs, boolean onlyDate) throws SQLException {
+        if (rs.next()) {    
+            this.date = rs.getString("DATE");
+        }
+    }*/
 
     static boolean checkTime(String time) {
         Pattern p1 = Pattern.compile("[01]\\d:[0-5]\\d:[0-5]\\d");
