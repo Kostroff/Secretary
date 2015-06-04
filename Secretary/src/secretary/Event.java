@@ -38,14 +38,14 @@ public class Event {
         Event.con = con;
     }
 
-    Event(String date, String time, String name, String text) {
+    public Event(String date, String time, String name, String text) {
         this.date = date;
         this.time = time;
         this.name = name;
         this.text = text;
     }
 
-    Event(ResultSet rs) throws SQLException {
+    public Event(ResultSet rs) throws SQLException {
         if (rs.next()) {
             this.id = rs.getString("ID");
             this.date = rs.getString("DATE");

@@ -87,9 +87,10 @@ public class MainFrame extends javax.swing.JFrame {
         jScrollPane2.setViewportView(jTextArea);
 
         jButtonAdd.setText("Добавить");
-        jButtonAdd.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jButtonAddMouseClicked(evt);
+        jButtonAdd.setName("jButtonAdd"); // NOI18N
+        jButtonAdd.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonAddActionPerformed(evt);
             }
         });
 
@@ -231,15 +232,6 @@ public class MainFrame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jListMouseClicked
 
-    private void jButtonAddMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButtonAddMouseClicked
-        if (DBisOn) {
-            AddFrame addFrame = new AddFrame();   
-        } else {
-            FailForm ff = new FailForm();
-            ff.setVisible(true);
-        }
-    }//GEN-LAST:event_jButtonAddMouseClicked
-
     private void jButtonUpdateMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButtonUpdateMouseClicked
         if (curPosition > -1) {
             UpdateFrame updateFrame = new UpdateFrame(eventsList.get(curPosition));
@@ -267,6 +259,16 @@ public class MainFrame extends javax.swing.JFrame {
         ConnectFrame conFrame = new ConnectFrame();
         conFrame.setVisible(true);
     }//GEN-LAST:event_jMenuItem1ActionPerformed
+
+    private void jButtonAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddActionPerformed
+        // TODO add your handling code here:
+        if (DBisOn) {
+            AddFrame addFrame = new AddFrame();   
+        } else {
+            FailForm ff = new FailForm();
+            ff.setVisible(true);
+        }
+    }//GEN-LAST:event_jButtonAddActionPerformed
 
     static class CheckEvent implements Runnable {
         public void run() {
@@ -304,8 +306,8 @@ public class MainFrame extends javax.swing.JFrame {
                         s = new StringBuilder("select ID, DATE, TIME, NAME, TEXT from MAINTABLE where (DATE = (SELECT MIN(DATE) FROM MAINTABLE WHERE (DATE>='') AND (TIME>=''))) AND (TIME = (Select min(time) from maintable where (TIME>='') and (DATE>='')))");
                         s.insert(110, curDateString);
                         s.insert(133,curTimeString);
-                        s.insert(205,curTimeString);
-                        s.insert(228, curDateString);
+                        s.insert(204,curTimeString);
+                        s.insert(226, curDateString);
                         
                         
                         ResultSet result = db.executeQuery(s.toString());
@@ -376,7 +378,7 @@ public class MainFrame extends javax.swing.JFrame {
     public static void main(String args[]) throws SQLException {
         //db = new DB("jdbc:derby://localhost:1527/TestDB", "kostroff", "x1439721");
         CheckDBListener cdbl = new CheckDBListener();
-        timer = new Timer(5000, cdbl);
+        timer = new Timer(2000, cdbl);
         timer.start();
         CheckEvent ce = new CheckEvent();
         Thread myThread = new Thread(ce);
